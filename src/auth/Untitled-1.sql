@@ -1,1 +1,0 @@
-DELETE * FROM `db`.`user` LIMIT 1000;

@@ -7,7 +7,7 @@
 /log
 /postgres-data
 
-/src/auth/sssKey
+/src/auth/sshKey
 /dist
 # testing
 /coverage
