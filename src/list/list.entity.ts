@@ -14,6 +14,6 @@ export class List {
     @Column({default: false})
     status: boolean;  
     
-    @Column({default: 2})
+    @Column({default: "2"})
     userId: number;
 }

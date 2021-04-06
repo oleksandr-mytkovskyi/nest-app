@@ -14,7 +14,7 @@ export class ListService {
         return this.listRepository.find();
     }
 
-    getById(id) {
+    getById(id: number) {
         return this.listRepository.findOne({id});
     }
     
@@ -22,11 +22,11 @@ export class ListService {
         return this.listRepository.save(newList);
     }
     
-    updataList(id, newList: Updata) {
+    updataList(id: number, newList: Updata) {
         return this.listRepository.update(id, newList);
     }
 
-    deleteList(id) {
+    deleteList(id: number) {
         return this.listRepository.delete({id});
 
     }

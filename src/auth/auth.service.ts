@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { Login, Registration, Auth } from './dto/auth.dto';
+import { Login, Registration, Auth, PayloadData } from './dto/auth.dto';
 import { User } from './user.entity';
 import { JwtService } from '@nestjs/jwt';
 import { jwtConstants } from './auth.constants';
@@ -56,18 +56,19 @@ export class AuthService {
         return hash;
     }
 
-    private getTokens(payload) {
-        const { secretPublickAccess, expiresInAccess, secretPublickRefresh, expiresInRefresh } = jwtConstants;
+    private getTokens(payload: PayloadData): Auth {
+        const { secretPrivatkAccess, expiresInAccess, secretPrivatkRefresh , expiresInRefresh } = jwtConstants;
         return {
             access_token: this.jwtService.sign(payload, {
-                secret: secretPublickAccess,
+                secret: secretPrivatkAccess,
+                algorithm: 'RS256',
                 expiresIn: expiresInAccess
             }),
             refresh_token: this.jwtService.sign(payload, {
-                secret: secretPublickRefresh,
+                secret: secretPrivatkRefresh,
+                algorithm: 'RS256',
                 expiresIn: expiresInRefresh
             })
         };
     }
-
 }

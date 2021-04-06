@@ -14,3 +14,8 @@ export class Auth {
     access_token: string;
     refresh_token: string;
 }
+export class PayloadData {
+    firstName: string;
+    lastName: string;
+    email: string;
+}

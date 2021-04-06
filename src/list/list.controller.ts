@@ -1,8 +1,10 @@
-import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, SetMetadata } from '@nestjs/common';
 import { ListService } from './list.service';
-import { Create, Updata, List } from './dto/list.dto'
+import { Create, Updata, List } from './dto/list.dto';
+import { AuthGuard } from '../auth/auth.guard';
 
 @Controller('list')
+@UseGuards(AuthGuard)
 export class ListController {
     constructor(private readonly listService: ListService){}
 
@@ -10,9 +12,9 @@ export class ListController {
     getAll() {
         return this.listService.getAll();
     }
-    
+
     @Get(':id')
-    getById(@Param() params){
+    getById(@Param() params) {
         return this.listService.getById(params.id);
     }
 
