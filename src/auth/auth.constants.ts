@@ -24,6 +24,11 @@ export const jwtConstants = {
     expiresInRefresh: '30d',
 };
 
+export const roles = {
+    ADMIN: 1,
+    USER: 2
+}
+
 
 
 

@@ -2,21 +2,20 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { Auth } from './auth.interface';
-import { User } from '../db/user.entity';
-import { Registration } from './registration.interface';
+import { Login, Registration, Auth } from './dto/auth.dto';
+import { User } from './user.entity';
 import { JwtService } from '@nestjs/jwt';
 import { jwtConstants } from './auth.constants';
 
 @Injectable()
-export class AuthServices {
+export class AuthService {
     constructor(
         @InjectRepository(User)
         private userRepository: Repository<User>,
         private readonly jwtService: JwtService
     ) { }
 
-    async login(logData: Auth) {
+    async login(logData: Login): Promise<Auth> {
         const { email, password } = logData;
         const dataInDB = await this.userRepository.findOne({ email });
         if(!dataInDB) {
@@ -32,7 +31,7 @@ export class AuthServices {
         return result;
     }
 
-    async registration(newUser: Registration) {
+    async registration(newUser: Registration): Promise<Auth> {
         const { email, password, firstName, lastName } = newUser;
         const dataInDB = await this.userRepository.findOne({ email });
         if (dataInDB) {
@@ -57,10 +56,6 @@ export class AuthServices {
         return hash;
     }
 
-    private comparePasswordHash(password, hash) {
-        return bcrypt.compareSync(password, hash);
-    }
-
     private getTokens(payload) {
         const { secretPublickAccess, expiresInAccess, secretPublickRefresh, expiresInRefresh } = jwtConstants;
         return {
@@ -76,10 +71,3 @@ export class AuthServices {
     }
 
 }
-
-// async login(user: any) {
-//     const payload = { username: user.username, sub: user.userId };
-//     return {
-//       access_token: this.jwtService.sign(payload),
-//     };
-//   }
