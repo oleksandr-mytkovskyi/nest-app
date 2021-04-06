@@ -2,8 +2,11 @@ import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, SetMetadata
 import { ListService } from './list.service';
 import { Create, Updata, List } from './dto/list.dto';
 import { AuthGuard } from '../auth/auth.guard';
+import { roles } from '../auth/auth.constants';
+import { Roles } from '../roles.decorator';
 
 @Controller('list')
+@Roles(roles)
 @UseGuards(AuthGuard)
 export class ListController {
     constructor(private readonly listService: ListService){}

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -19,14 +19,20 @@ export class AuthService {
         const { email, password } = logData;
         const dataInDB = await this.userRepository.findOne({ email });
         if(!dataInDB) {
-            throw new Error('email dont user, maybe you need registration');
+            throw new HttpException({
+                status: HttpStatus.UNAUTHORIZED,
+                error: 'email dont used, maybe you need registration'
+            }, HttpStatus.UNAUTHORIZED);
         }
         const verify = bcrypt.compareSync(password, dataInDB.password);
         if(!verify) {
-            throw new Error('password incorrect');
+            throw new HttpException({
+                status: HttpStatus.UNAUTHORIZED,
+                error: 'invalid password'
+            }, HttpStatus.UNAUTHORIZED);
         }
-        const { firstName, lastName } = dataInDB;
-        const payload = { firstName, lastName, email };
+        const { firstName, lastName, roleId } = dataInDB;
+        const payload = { firstName, lastName, email, roleId };
         const result = this.getTokens(payload);
         return result;
     }
@@ -35,7 +41,10 @@ export class AuthService {
         const { email, password, firstName, lastName } = newUser;
         const dataInDB = await this.userRepository.findOne({ email });
         if (dataInDB) {
-            throw new Error('email was used, maybe you need login');
+            throw new HttpException({
+                status: HttpStatus.UNAUTHORIZED,
+                error: 'email was used, maybe you need login'
+            }, HttpStatus.UNAUTHORIZED);
         }
         const hash = this.getPasswordHash(password);
         const saveData = {
@@ -44,8 +53,9 @@ export class AuthService {
             firstName,
             lastName
         }
-        this.userRepository.save(saveData);
-        const payload = { firstName, lastName, email };
+        const data = await this.userRepository.save(saveData);
+        console.log(data);
+        const payload = { firstName, lastName, email, roleId: data.roleId };
         const result = this.getTokens(payload);
         return result;
     }
