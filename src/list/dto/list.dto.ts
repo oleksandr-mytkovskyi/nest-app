@@ -1,6 +1,7 @@
 export class Create {
     title: string;
     description: string;
+    user: number;
   }
 
 export class Updata {
@@ -14,5 +15,4 @@ export class List {
   description: string;
   id: number;
   status: boolean;
-  userId: number;
 }

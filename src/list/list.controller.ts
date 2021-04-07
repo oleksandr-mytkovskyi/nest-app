@@ -1,24 +1,27 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, SetMetadata } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, Request, ParseIntPipe } from '@nestjs/common';
 import { ListService } from './list.service';
 import { Create, Updata, List } from './dto/list.dto';
 import { AuthGuard } from '../auth/auth.guard';
-import { roles } from '../auth/auth.constants';
+// import { roles } from '../auth/auth.constants';
+import { Role } from '../enums/role.enum';
 import { Roles } from '../roles.decorator';
 
 @Controller('list')
-@Roles(roles)
+@Roles(Role.ADMIN, Role.USER)
 @UseGuards(AuthGuard)
 export class ListController {
     constructor(private readonly listService: ListService){}
 
     @Get('')
-    getAll() {
+    getAll(@Request() req) {
+        console.log(req.user);
         return this.listService.getAll();
     }
 
     @Get(':id')
-    getById(@Param() params) {
-        return this.listService.getById(params.id);
+    getById(@Param('id', ParseIntPipe) id: number) {
+        console.log(id)
+        return this.listService.getById(id);
     }
 
     @Put(':id')
@@ -27,7 +30,10 @@ export class ListController {
     }
 
     @Post('')
-    createList(@Body() newList: Create): Promise<List> {
+    createList(@Body() newList: Create, @Request() req): Promise<List> {
+        console.log(req.user);
+        newList.user = req.user.userId;
+        console.log(newList);
         return this.listService.createList(newList);
     }
 

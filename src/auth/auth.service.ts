@@ -2,10 +2,12 @@ import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { Login, Registration, Auth, PayloadData } from './dto/auth.dto';
+import { LoginDTO, RegistrationDTO, AuthDTO, PayloadDataDTO } from './dto/auth.dto';
 import { User } from './user.entity';
 import { JwtService } from '@nestjs/jwt';
 import { jwtConstants } from './auth.constants';
+import { UserSerializeDTO } from './dto/auth.serialize.dto';
+import { plainToClass } from 'class-transformer';
 
 @Injectable()
 export class AuthService {
@@ -15,7 +17,7 @@ export class AuthService {
         private readonly jwtService: JwtService
     ) { }
 
-    async login(logData: Login): Promise<Auth> {
+    async login(logData: LoginDTO): Promise<AuthDTO> {
         const { email, password } = logData;
         const dataInDB = await this.userRepository.findOne({ email });
         if(!dataInDB) {
@@ -31,13 +33,13 @@ export class AuthService {
                 error: 'invalid password'
             }, HttpStatus.UNAUTHORIZED);
         }
-        const { firstName, lastName, roleId } = dataInDB;
-        const payload = { firstName, lastName, email, roleId };
+        const serialize = plainToClass(UserSerializeDTO, dataInDB);
+        const payload = {...serialize};
         const result = this.getTokens(payload);
         return result;
     }
 
-    async registration(newUser: Registration): Promise<Auth> {
+    async registration(newUser: RegistrationDTO): Promise<AuthDTO> {
         const { email, password, firstName, lastName } = newUser;
         const dataInDB = await this.userRepository.findOne({ email });
         if (dataInDB) {
@@ -54,8 +56,8 @@ export class AuthService {
             lastName
         }
         const data = await this.userRepository.save(saveData);
-        console.log(data);
-        const payload = { firstName, lastName, email, roleId: data.roleId };
+        const serialize = plainToClass(UserSerializeDTO, data);
+        const payload = {...serialize};
         const result = this.getTokens(payload);
         return result;
     }
@@ -66,7 +68,7 @@ export class AuthService {
         return hash;
     }
 
-    private getTokens(payload: PayloadData): Auth {
+    private getTokens(payload: PayloadDataDTO): AuthDTO {
         const { secretPrivatkAccess, expiresInAccess, secretPrivatkRefresh , expiresInRefresh } = jwtConstants;
         return {
             access_token: this.jwtService.sign(payload, {

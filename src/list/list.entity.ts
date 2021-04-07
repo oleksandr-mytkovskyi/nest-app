@@ -1,4 +1,5 @@
-import {Entity,  Column, PrimaryGeneratedColumn} from "typeorm";
+import {Entity,  Column, PrimaryGeneratedColumn, ManyToOne} from "typeorm";
+import { User } from '../auth/user.entity';
 
 @Entity()
 export class List {
@@ -14,6 +15,6 @@ export class List {
     @Column({default: false})
     status: boolean;  
     
-    @Column({default: "2"})
-    userId: number;
+    @ManyToOne(type => User, user => user.lists)
+    user: number;
 }
