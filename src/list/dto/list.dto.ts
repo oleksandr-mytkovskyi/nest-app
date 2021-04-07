@@ -1,16 +1,20 @@
-export class Create {
+export class CreateDTO {
     title: string;
     description: string;
-    user: number;
   }
+export class CreateWithUserDTO {
+  title: string;
+  description: string;
+  user: number;
+}
 
-export class Updata {
+export class UpdataDTO {
     title: string;
     description: string;
     status: boolean;
 }
 
-export class List {
+export class ListDTO {
   title: string;
   description: string;
   id: number;

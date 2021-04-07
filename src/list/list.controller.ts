@@ -1,8 +1,7 @@
 import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, Request, ParseIntPipe } from '@nestjs/common';
 import { ListService } from './list.service';
-import { Create, Updata, List } from './dto/list.dto';
+import { CreateDTO, UpdataDTO, ListDTO, CreateWithUserDTO } from './dto/list.dto';
 import { AuthGuard } from '../auth/auth.guard';
-// import { roles } from '../auth/auth.constants';
 import { Role } from '../enums/role.enum';
 import { Roles } from '../roles.decorator';
 
@@ -14,33 +13,33 @@ export class ListController {
 
     @Get('')
     getAll(@Request() req) {
-        console.log(req.user);
-        return this.listService.getAll();
+        const { userId, roleId } = req.user;
+        if(roleId === Role.ADMIN) return this.listService.getAll();
+        if(roleId === Role.USER) return this.listService.getAllByUserId(userId);
     }
 
     @Get(':id')
     getById(@Param('id', ParseIntPipe) id: number) {
-        console.log(id)
         return this.listService.getById(id);
     }
 
     @Put(':id')
-    updataList(@Param() params, @Body() updataList: Updata) {
-        return this.listService.updataList(params.id, updataList);
+    updataList(@Request() req, @Param() param, @Body() updataList: UpdataDTO) {
+        const { userId, roleId } = req.user;
+        if(roleId === Role.ADMIN) return  this.listService.updataList(param.id, updataList);
+        if(roleId === Role.USER) return  this.listService.updataListByUserId(param.id, updataList, userId);
     }
 
     @Post('')
-    createList(@Body() newList: Create, @Request() req): Promise<List> {
-        console.log(req.user);
-        newList.user = req.user.userId;
-        console.log(newList);
-        return this.listService.createList(newList);
+    createList(@Body() newList: CreateDTO, @Request() req): Promise<ListDTO> {
+        const postData: CreateWithUserDTO = {...newList, user: req.user.userId}
+        return this.listService.createList(postData);
     }
 
     @Delete(':id')
-    deleteList(@Param() param) {
-        return this.listService.deleteList(param.id);
+    deleteList(@Request() req, @Param() param) {
+        const { userId, roleId } = req.user;
+        if(roleId === Role.ADMIN) return  this.listService.deleteList(param.id);
+        if(roleId === Role.USER) return  this.listService.deleteListByUserId(param.id, userId);
     }
-
-
 }
