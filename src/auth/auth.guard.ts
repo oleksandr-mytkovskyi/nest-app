@@ -25,7 +25,7 @@ export class AuthGuard implements CanActivate {
         } catch (e) {
             throw new HttpException({
                 status: HttpStatus.FORBIDDEN,
-                error: 'Token not valid',
+                error: 'Role not valid',
             }, HttpStatus.FORBIDDEN);
         }
     }
