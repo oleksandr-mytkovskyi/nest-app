@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, Request, ParseIntPipe } from '@nestjs/common';
+import { SkipThrottle, Throttle } from '@nestjs/throttler';
 import { ListService } from './list.service';
 import { CreateDTO, UpdataDTO, ListDTO, CreateWithUserDTO } from './dto/list.dto';
 import { AuthGuard } from '../auth/auth.guard';
@@ -13,6 +14,7 @@ export class ListController {
     constructor(private readonly listService: ListService){}
 
     @Get('')
+    @Throttle(5, 60)
     getAll(@Request() req: ExperessReq) {
         const { userId, roleId } = req.user;
         if(roleId === Role.ADMIN) return this.listService.getAll();
@@ -32,6 +34,7 @@ export class ListController {
     }
 
     @Post('')
+    @SkipThrottle()
     createList(@Body() newList: CreateDTO, @Request() req:ExperessReq): Promise<ListDTO> {
         const postData: CreateWithUserDTO = {...newList, user: req.user.userId}
         return this.listService.createList(postData);
