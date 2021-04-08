@@ -9,6 +9,9 @@ export class UserSerializeDTO {
   @Exclude()
   password: string;
 
+  @Exclude()
+  refreshToken: Object;
+
   constructor(partial: Partial<UserSerializeDTO>) {
     Object.assign(this, partial);
   }

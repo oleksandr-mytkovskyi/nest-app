@@ -14,28 +14,30 @@ export class AuthService {
     constructor(
         @InjectRepository(User)
         private userRepository: Repository<User>,
-        private readonly jwtService: JwtService
+        private readonly jwtService: JwtService,
     ) { }
 
     async login(logData: LoginDTO): Promise<AuthDTO> {
         const { email, password } = logData;
-        const dataInDB = await this.userRepository.findOne({ email });
-        if(!dataInDB) {
+        const data = await this.userRepository.findOne({ where: { email } });
+        if(!data) {
             throw new HttpException({
                 status: HttpStatus.UNAUTHORIZED,
                 error: 'email dont used, maybe you need registration'
             }, HttpStatus.UNAUTHORIZED);
         }
-        const verify = bcrypt.compareSync(password, dataInDB.password);
+        const verify = bcrypt.compareSync(password, data.password);
         if(!verify) {
             throw new HttpException({
                 status: HttpStatus.UNAUTHORIZED,
                 error: 'invalid password'
             }, HttpStatus.UNAUTHORIZED);
         }
-        const serialize = plainToClass(UserSerializeDTO, dataInDB);
+        const serialize = plainToClass(UserSerializeDTO, data);
         const payload = {...serialize};
         const result = this.getTokens(payload);
+        const refreshToken = result.refresh_token;
+        await this.userRepository.update({id: data.id}, {refreshToken});
         return result;
     }
 
@@ -53,12 +55,14 @@ export class AuthService {
             email,
             password: hash,
             firstName,
-            lastName
+            lastName,
         }
         const data = await this.userRepository.save(saveData);
         const serialize = plainToClass(UserSerializeDTO, data);
         const payload = {...serialize};
         const result = this.getTokens(payload);
+        const refreshToken = result.refresh_token;
+        await this.userRepository.update({id: data.id}, {refreshToken});
         return result;
     }
 
